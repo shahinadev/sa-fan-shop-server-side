@@ -32,14 +32,17 @@ router.post("/add-user", async (req, res) => {
 });
 
 // make admin api by email
-router.put("/make-admin/", async (req, res) => {
+router.put("/make-admin", async (req, res) => {
   const { email } = req.body;
-  if (!email.length > 0) return;
+  console.log(email);
   try {
     const doc = await UserModel.findOneAndUpdate(
       { email: email },
-      { $set: { role: "admin" } },
-      { new: true }
+      {
+        $set: {
+          role: "admin",
+        },
+      }
     );
     res.status(200).json(doc);
   } catch (err) {
