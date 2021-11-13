@@ -2,11 +2,27 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const orderSchema = new Schema({
-  product_id: {
+  email: {
     type: String,
     required: true,
   },
-  product_quantity: {
+  username: {
+    type: String,
+    required: true,
+  },
+  product_name: {
+    type: String,
+    required: true,
+  },
+  country: {
+    type: String,
+    required: true,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  district: {
     type: String,
     required: true,
   },
@@ -14,15 +30,11 @@ const orderSchema = new Schema({
     type: String,
     required: true,
   },
+  product_quantity: {
+    type: String,
+    required: true,
+  },
   delivery_address: {
-    type: String,
-    required: true,
-  },
-  user_email: {
-    type: String,
-    required: true,
-  },
-  username: {
     type: String,
     required: true,
   },

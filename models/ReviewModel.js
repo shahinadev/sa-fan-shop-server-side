@@ -17,7 +17,7 @@ const ReviewSchema = new Schema({
     type: String,
     required: true,
   },
-  review: {
+  review_text: {
     type: String,
     required: true,
   },
@@ -26,5 +26,5 @@ const ReviewSchema = new Schema({
     required: true,
   },
 });
-const ReviewModel = mongoose.model("user", ReviewSchema);
+const ReviewModel = mongoose.model("Review", ReviewSchema);
 module.exports = ReviewModel;

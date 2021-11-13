@@ -2,6 +2,7 @@ const express = require("express");
 const ProductModel = require("../models/ProductModel");
 const UserModel = require("../models/UserModel");
 const OrderModel = require("../models/OrderModel");
+const ReviewModel = require("../models/ReviewModel");
 const router = express.Router();
 
 //add a new product api
@@ -12,7 +13,6 @@ router.post("/add-product", async (req, res) => {
     const result = await doc.save();
     res.status(200).json(result);
   } catch (err) {
-    console.log(err);
     res.status(500).send({ error: err });
   }
 });
@@ -25,11 +25,9 @@ router.post("/add-user", async (req, res) => {
     const result = await doc.save();
     res.status(200).json(result);
   } catch (err) {
-    if (err.keyPattern.email > 0) {
-      res.send({
-        message: "Email address already added..",
-      });
-    }
+    res.send({
+      message: "Email address already added..",
+    });
   }
 });
 
@@ -45,26 +43,42 @@ router.put("/make-admin/", async (req, res) => {
     );
     res.status(200).json(doc);
   } catch (err) {
-    console.log(err);
-    res.status(500).send({ error: err });
+    res.status(500).send({ message: "something is wrong." });
   }
 });
 
 //get all products api
 router.get("/products", async (req, res) => {
+  const page = req.query.page;
+  const size = req.query.size;
+  let products;
+  let count;
   try {
-    const result = await ProductModel.find({});
-    res.status(200).json(result);
+    if (page) {
+      products = await ProductModel.find(
+        {},
+        {},
+        { skip: page * size, limit: parseInt(size) }
+      );
+      count = await ProductModel.countDocuments({});
+    } else {
+      products = await ProductModel.find({});
+      count = await ProductModel.countDocuments({});
+    }
   } catch (error) {
     res.status(500).json({
-      error,
+      message: "Something is wrong...!",
     });
   }
+  res.status(200).json({
+    count,
+    products,
+  });
 });
 
 //get single user by email api
 router.get("/user/:email", async (req, res) => {
-  console.log(req.params);
+  if (req.params.email.length < 0) return;
   try {
     const result = await UserModel.find({ email: req.params.email });
     res.status(200).json(result);
@@ -111,7 +125,6 @@ router.post("/orders", async (req, res) => {
       message: "Something is wrong...!",
     });
   }
-  res.status(200).send(data);
 });
 
 //get all orders api
@@ -144,11 +157,12 @@ router.put("/orders/", async (req, res) => {
   try {
     const result = await OrderModel.findOneAndUpdate(
       { _id: id },
-      { $set: { status: newStatus } },
+      { $set: { order_status: newStatus } },
       { new: true }
     );
     res.status(200).json(result);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Something is wrong...!" });
   }
 });
@@ -158,6 +172,72 @@ router.delete("/orders/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const result = await OrderModel.findByIdAndDelete(id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: "Something is wrong...!" });
+  }
+});
+
+//save user review api
+router.post("/reviews", async (req, res) => {
+  const data = req.body;
+  try {
+    const doc = new ReviewModel(data);
+    const result = await doc.save();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: "Something is wrong...!",
+    });
+  }
+});
+
+//get all reviews api
+router.get("/reviews", async (req, res) => {
+  const page = req.query.page;
+  const size = req.query.size;
+  let reviews;
+  let count;
+  try {
+    if (page) {
+      reviews = await ReviewModel.find(
+        {},
+        {},
+        { skip: page * size, limit: parseInt(size) }
+      );
+      count = await ReviewModel.countDocuments({});
+    } else {
+      reviews = await ReviewModel.find({});
+      count = await ReviewModel.countDocuments({});
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Something is wrong...!",
+    });
+  }
+  res.status(200).json({
+    count,
+    reviews,
+  });
+});
+
+//get reviews by email api
+router.get("/reviews/:email", async (req, res) => {
+  try {
+    const result = await ReviewModel.find({ email: req.params.email });
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: "Something is wrong...!",
+    });
+  }
+});
+
+//delete review api
+router.delete("/reviews/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await ReviewModel.findByIdAndDelete(id);
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: "Something is wrong...!" });
